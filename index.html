@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#1e293b" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>StudyPulse — Daily Pages & MCQ Counter</title>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface-2: #f1f5f9;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --primary: #2563eb;
+    --primary-light: #dbeafe;
+    --accent: #0d9488;
+    --accent-light: #ccfbf1;
+    --warn: #d97706;
+    --danger: #dc2626;
+    --success: #16a34a;
+    --shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+  }
+  [data-theme="dark"] {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface-2: #334155;
+    --text: #f8fafc;
+    --text-muted: #94a3b8;
+    --border: #334155;
+    --primary: #3b82f6;
+    --primary-light: #1e3a8a;
+    --accent: #14b8a6;
+    --accent-light: #115e59;
+    --shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding-bottom: 84px;
+  }
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .brand { font-weight: 800; font-size: 18px; letter-spacing: -0.3px; }
+  .brand span { color: var(--primary); }
+  .date-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    margin: 12px 14px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .date-bar button {
+    background: var(--surface-2);
+    border: none;
+    color: var(--text);
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .date-label { font-weight: 700; font-size: 15px; text-align: center; }
+  .date-sub { font-size: 12px; color: var(--text-muted); text-align: center; }
+  .container { padding: 0 14px; max-width: 680px; margin: 0 auto; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  @media (max-width: 480px) { .grid-2 { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .big-num { font-size: 34px; font-weight: 800; line-height: 1.1; }
+  .target-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 8px;
+  }
+  .badge-rem { background: var(--primary-light); color: var(--primary); }
+  .badge-done { background: #dcfce7; color: #15803d; }
+  .progress-wrap {
+    height: 10px;
+    background: var(--surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 12px 0;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 999px;
+    transition: width 0.25s ease;
+  }
+  .progress-fill.mcq { background: var(--accent); }
+  .quick-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .btn-chip {
+    flex: 1;
+    min-width: 48px;
+    padding: 9px 6px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .btn-chip:active { transform: scale(0.96); }
+  .custom-row { display: flex; gap: 8px; margin-top: 10px; }
+  input, select {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    width: 100%;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn-accent { background: var(--accent); }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .log-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .log-item:last-child { border-bottom: none; }
+  .del-btn {
+    background: none;
+    border: none;
+    color: var(--danger);
+    font-weight: 700;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+  .tab-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    z-index: 30;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 12px 6px;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .tab-btn.active { color: var(--primary); border-top: 3px solid var(--primary); }
+  .hidden { display: none; }
+  .week-bars {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    align-items: end;
+    height: 150px;
+    padding-top: 20px;
+    margin: 12px 0;
+  }
+  .bar-col { display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
+  .bar-pair { display: flex; gap: 3px; align-items: flex-end; height: 110px; width: 100%; justify-content: center; }
+  .bar { width: 10px; border-radius: 4px 4px 0 0; min-height: 3px; transition: height 0.3s; }
+  .bar.p { background: var(--primary); }
+  .bar.m { background: var(--accent); }
+  .bar-day { font-size: 11px; font-weight: 700; margin-top: 6px; color: var(--text-muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); }
+  th { color: var(--text-muted); font-size: 11px; text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Study<span>Pulse</span></div>
+  <button class="btn-outline" id="themeBtn" onclick="toggleTheme()">Dark / Light</button>
+</header>
+
+<div class="date-bar">
+  <button onclick="shiftDate(-1)">&lt;</button>
+  <div>
+    <div class="date-label" id="currentDateText">Today</div>
+    <div class="date-sub" id="currentDateSub"></div>
+  </div>
+  <button onclick="shiftDate(1)">&gt;</button>
+</div>
+
+<div class="container">
+  <div id="tab-today">
+    <div class="card" style="padding:12px 14px;">
+      <div class="card-title" style="margin-bottom:6px;">Active Subject</div>
+      <div style="display:flex; gap:8px;">
+        <select id="subjectSelect">
+          <option value="General Knowledge">General Knowledge</option>
+          <option value="Bangla">Bangla</option>
+          <option value="English">English</option>
+          <option value="Mathematics">Mathematics</option>
+          <option value="Current Affairs">Current Affairs</option>
+          <option value="Science & ICT">Science & ICT</option>
+          <option value="Banking & Economy">Banking & Economy</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">
+          <span>Pages Read</span>
+          <span id="pagesPct">0%</span>
+        </div>
+        <div class="big-num" id="pagesDone">0</div>
+        <div class="target-sub">Daily Target: <strong id="pagesTargetLbl">30</strong> pages</div>
+        <div id="pagesRemBadge" class="badge badge-rem">30 pages left</div>
+        <div class="progress-wrap"><div class="progress-fill" id="pagesBar" style="width:0%"></div></div>
+        <div class="quick-btns">
+          <button class="btn-chip" onclick="addEntry('pages', 1)">+1</button>
+          <button class="btn-chip" onclick="addEntry('pages', 5)">+5</button>
+          <button class="btn-chip" onclick="addEntry('pages', 10)">+10</button>
+          <button class="btn-chip" onclick="addEntry('pages', 20)">+20</button>
+        </div>
+        <div class="custom-row">
+          <input type="number" id="customPages" placeholder="Custom pages" min="1" />
+          <button class="btn-primary" onclick="addCustom('pages')">Add</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span>MCQs Read / Solved</span>
+          <span id="mcqPct">0%</span>
+        </div>
+        <div class="big-num" id="mcqDone">0</div>
+        <div class="target-sub">Daily Target: <strong id="mcqTargetLbl">100</strong> MCQs</div>
+        <div id="mcqRemBadge" class="badge badge-rem">100 MCQs left</div>
+        <div class="progress-wrap"><div class="progress-fill mcq" id="mcqBar" style="width:0%"></div></div>
+        <div class="quick-btns">
+          <button class="btn-chip" onclick="addEntry('mcq', 5)">+5</button>
+          <button class="btn-chip" onclick="addEntry('mcq', 10)">+10</button>
+          <button class="btn-chip" onclick="addEntry('mcq', 25)">+25</button>
+          <button class="btn-chip" onclick="addEntry('mcq', 50)">+50</button>
+        </div>
+        <div class="custom-row">
+          <input type="number" id="customMcq" placeholder="Custom MCQs" min="1" />
+          <button class="btn-primary btn-accent" onclick="addCustom('mcq')">Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span>Today's Study Log</span>
+        <span id="logCount">0 sessions</span>
+      </div>
+      <div id="logList"></div>
+    </div>
+  </div>
+
+  <div id="tab-week" class="hidden">
+    <div class="card">
+      <div class="card-title">
+        <span>Week-Wise Review</span>
+        <select id="weekOffset" style="width:auto; padding:4px 8px; font-size:12px;" onchange="renderWeek()">
+          <option value="0">This Week</option>
+          <option value="-1">Last Week</option>
+          <option value="-2">2 Weeks Ago</option>
+          <option value="-3">3 Weeks Ago</option>
+        </select>
+      </div>
+      <div id="weekRangeLbl" style="font-size:13px; color:var(--text-muted); margin-bottom:10px;"></div>
+
+      <div class="grid-2" style="margin-bottom:8px;">
+        <div style="background:var(--surface-2); padding:12px; border-radius:12px;">
+          <div style="font-size:12px; color:var(--text-muted);">Total Weekly Pages</div>
+          <div style="font-size:24px; font-weight:800; color:var(--primary);" id="wkPagesTotal">0</div>
+          <div style="font-size:12px; color:var(--text-muted);" id="wkPagesSub">0 / 210 target</div>
+        </div>
+        <div style="background:var(--surface-2); padding:12px; border-radius:12px;">
+          <div style="font-size:12px; color:var(--text-muted);">Total Weekly MCQs</div>
+          <div style="font-size:24px; font-weight:800; color:var(--accent);" id="wkMcqTotal">0</div>
+          <div style="font-size:12px; color:var(--text-muted);" id="wkMcqSub">0 / 700 target</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:14px; font-size:12px; margin-top:8px;">
+        <span><strong style="color:var(--primary);">&#9632;</strong> Pages</span>
+        <span><strong style="color:var(--accent);">&#9632;</strong> MCQs</span>
+      </div>
+      <div class="week-bars" id="weekChart"></div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Day</th>
+            <th>Pages (Left)</th>
+            <th>MCQs (Left)</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="weekTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="tab-settings" class="hidden">
+    <div class="card">
+      <div class="card-title">Daily Targets & Week Start</div>
+      <label style="font-size:13px; font-weight:600;">Daily Pages Target</label>
+      <input type="number" id="setPagesTarget" min="1" style="margin:6px 0 12px;" />
+
+      <label style="font-size:13px; font-weight:600;">Daily MCQ Target</label>
+      <input type="number" id="setMcqTarget" min="1" style="margin:6px 0 12px;" />
+
+      <label style="font-size:13px; font-weight:600;">Week Starts On</label>
+      <select id="setWeekStart" style="margin:6px 0 14px;">
+        <option value="6">Saturday (Sat - Fri)</option>
+        <option value="0">Sunday (Sun - Sat)</option>
+        <option value="1">Monday (Mon - Sun)</option>
+      </select>
+
+      <button class="btn-primary" style="width:100%;" onclick="saveSettings()">Save Targets</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Data Backup & Export</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn-outline" onclick="exportCSV()">Export CSV</button>
+        <button class="btn-outline" onclick="exportJSON()">Backup JSON</button>
+        <button class="btn-outline" style="color:var(--danger);" onclick="clearAllData()">Reset All</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="tab-bar">
+  <button class="tab-btn active" id="nav-today" onclick="switchTab('today')">Today Counter</button>
+  <button class="tab-btn" id="nav-week" onclick="switchTab('week')">Week Review</button>
+  <button class="tab-btn" id="nav-settings" onclick="switchTab('settings')">Targets</button>
+</nav>
+
+<script>
+  const STORAGE_KEY = 'studypulse_v1';
+  let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || {
+    targets: { pages: 30, mcq: 100, weekStart: 6 },
+    theme: 'light',
+    logs: {}
+  };
+
+  let selectedDate = new Date();
+
+  function fmtDateKey(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function applyTheme() {
+    document.documentElement.setAttribute('data-theme', state.theme);
+  }
+
+  function toggleTheme() {
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    saveState();
+    applyTheme();
+  }
+
+  function shiftDate(delta) {
+    selectedDate.setDate(selectedDate.getDate() + delta);
+    renderAll();
+  }
+
+  function addEntry(type, count) {
+    if (!count || count <= 0) return;
+    const key = fmtDateKey(selectedDate);
+    if (!state.logs[key]) state.logs[key] = [];
+    const subject = document.getElementById('subjectSelect').value;
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    state.logs[key].unshift({ id: Date.now() + Math.random(), type, count: Number(count), subject, time });
+    saveState();
+    renderAll();
+  }
+
+  function addCustom(type) {
+    const el = document.getElementById(type === 'pages' ? 'customPages' : 'customMcq');
+    const val = parseInt(el.value, 10);
+    if (val > 0) {
+      addEntry(type, val);
+      el.value = '';
+    }
+  }
+
+  function deleteEntry(id) {
+    const key = fmtDateKey(selectedDate);
+    if (!state.logs[key]) return;
+    state.logs[key] = state.logs[key].filter(item => item.id !== id);
+    saveState();
+    renderAll();
+  }
+
+  function getDayTotals(dateKey) {
+    const entries = state.logs[dateKey] || [];
+    let pages = 0, mcq = 0;
+    entries.forEach(e => {
+      if (e.type === 'pages') pages += e.count;
+      if (e.type === 'mcq') mcq += e.count;
+    });
+    return { pages, mcq, entries };
+  }
+
+  function renderToday() {
+    const key = fmtDateKey(selectedDate);
+    const todayKey = fmtDateKey(new Date());
+    document.getElementById('currentDateText').textContent = key === todayKey ? 'Today' : selectedDate.toLocaleDateString(undefined, { weekday: 'long' });
+    document.getElementById('currentDateSub').textContent = selectedDate.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+
+    const { pages, mcq, entries } = getDayTotals(key);
+    const pTarget = state.targets.pages;
+    const mTarget = state.targets.mcq;
+
+    document.getElementById('pagesDone').textContent = pages;
+    document.getElementById('pagesTargetLbl').textContent = pTarget;
+    const pLeft = Math.max(0, pTarget - pages);
+    const pPct = Math.min(100, Math.round((pages / pTarget) * 100));
+    document.getElementById('pagesPct').textContent = pPct + '%';
+    document.getElementById('pagesBar').style.width = pPct + '%';
+    const pBadge = document.getElementById('pagesRemBadge');
+    if (pLeft === 0) {
+      pBadge.textContent = `Goal Hit! (+${pages - pTarget} extra)`;
+      pBadge.className = 'badge badge-done';
+    } else {
+      pBadge.textContent = `${pLeft} pages left today`;
+      pBadge.className = 'badge badge-rem';
+    }
+
+    document.getElementById('mcqDone').textContent = mcq;
+    document.getElementById('mcqTargetLbl').textContent = mTarget;
+    const mLeft = Math.max(0, mTarget - mcq);
+    const mPct = Math.min(100, Math.round((mcq / mTarget) * 100));
+    document.getElementById('mcqPct').textContent = mPct + '%';
+    document.getElementById('mcqBar').style.width = mPct + '%';
+    const mBadge = document.getElementById('mcqRemBadge');
+    if (mLeft === 0) {
+      mBadge.textContent = `Goal Hit! (+${mcq - mTarget} extra)`;
+      mBadge.className = 'badge badge-done';
+    } else {
+      mBadge.textContent = `${mLeft} MCQs left today`;
+      mBadge.className = 'badge badge-rem';
+    }
+
+    document.getElementById('logCount').textContent = `${entries.length} session${entries.length === 1 ? '' : 's'}`;
+    const listEl = document.getElementById('logList');
+    if (entries.length === 0) {
+      listEl.innerHTML = '<div style="color:var(--text-muted); font-size:13px; padding:8px 0;">No study logs for this date yet. Tap +5 or +10 above to start!</div>';
+    } else {
+      listEl.innerHTML = entries.map(e => `
+        <div class="log-item">
+          <div>
+            <strong>+${e.count} ${e.type === 'pages' ? 'Pages' : 'MCQs'}</strong>
+            <span style="color:var(--text-muted); font-size:12px;"> &bull; ${e.subject} (${e.time})</span>
+          </div>
+          <button class="del-btn" onclick="deleteEntry(${e.id})">Remove</button>
+        </div>
+      `).join('');
+    }
+  }
+
+  function renderWeek() {
+    const offset = parseInt(document.getElementById('weekOffset').value, 10);
+    const weekStartDay = Number(state.targets.weekStart);
+    const base = new Date();
+    base.setDate(base.getDate() + offset * 7);
+    const diff = (base.getDay() - weekStartDay + 7) % 7;
+    const start = new Date(base);
+    start.setDate(base.getDate() - diff);
+
+    const days = [];
+    let totalP = 0, totalM = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      const key = fmtDateKey(d);
+      const totals = getDayTotals(key);
+      totalP += totals.pages;
+      totalM += totals.mcq;
+      days.push({
+        date: d,
+        key,
+        dayName: d.toLocaleDateString(undefined, { weekday: 'short' }),
+        shortDate: d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+        pages: totals.pages,
+        mcq: totals.mcq
+      });
+    }
+
+    const pWeeklyTarget = state.targets.pages * 7;
+    const mWeeklyTarget = state.targets.mcq * 7;
+    const pWeeklyLeft = Math.max(0, pWeeklyTarget - totalP);
+    const mWeeklyLeft = Math.max(0, mWeeklyTarget - totalM);
+
+    document.getElementById('weekRangeLbl').textContent = `${days[0].shortDate} — ${days[6].shortDate}`;
+    document.getElementById('wkPagesTotal').textContent = totalP;
+    document.getElementById('wkPagesSub').textContent = `${totalP} / ${pWeeklyTarget} (${pWeeklyLeft} left)`;
+    document.getElementById('wkMcqTotal').textContent = totalM;
+    document.getElementById('wkMcqSub').textContent = `${totalM} / ${mWeeklyTarget} (${mWeeklyLeft} left)`;
+
+    const chartEl = document.getElementById('weekChart');
+    chartEl.innerHTML = days.map(d => {
+      const pH = Math.min(100, Math.round((d.pages / state.targets.pages) * 100));
+      const mH = Math.min(100, Math.round((d.mcq / state.targets.mcq) * 100));
+      return `
+        <div class="bar-col">
+          <div class="bar-pair">
+            <div class="bar p" style="height:${Math.max(4, pH)}%" title="${d.pages} pages"></div>
+            <div class="bar m" style="height:${Math.max(4, mH)}%" title="${d.mcq} MCQs"></div>
+          </div>
+          <div class="bar-day">${d.dayName}</div>
+        </div>
+      `;
+    }).join('');
+
+    const tbody = document.getElementById('weekTableBody');
+    tbody.innerHTML = days.map(d => {
+      const pRem = Math.max(0, state.targets.pages - d.pages);
+      const mRem = Math.max(0, state.targets.mcq - d.mcq);
+      const done = pRem === 0 && mRem === 0;
+      return `
+        <tr onclick="jumpToDate('${d.key}')" style="cursor:pointer;">
+          <td><strong>${d.dayName}</strong><br><span style="font-size:11px;color:var(--text-muted);">${d.shortDate}</span></td>
+          <td><strong>${d.pages}</strong> <span style="color:var(--text-muted);font-size:11px;">(${pRem} left)</span></td>
+          <td><strong>${d.mcq}</strong> <span style="color:var(--text-muted);font-size:11px;">(${mRem} left)</span></td>
+          <td>${done ? '<span style="color:var(--success);font-weight:700;">Done</span>' : '<span style="color:var(--warn);font-weight:700;">Active</span>'}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function jumpToDate(dateKey) {
+    const [y, m, d] = dateKey.split('-').map(Number);
+    selectedDate = new Date(y, m - 1, d);
+    switchTab('today');
+  }
+
+  function switchTab(tab) {
+    ['today', 'week', 'settings'].forEach(t => {
+      document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
+      document.getElementById('nav-' + t).classList.toggle('active', t === tab);
+    });
+    if (tab === 'week') renderWeek();
+    if (tab === 'settings') {
+      document.getElementById('setPagesTarget').value = state.targets.pages;
+      document.getElementById('setMcqTarget').value = state.targets.mcq;
+      document.getElementById('setWeekStart').value = state.targets.weekStart;
+    }
+  }
+
+  function saveSettings() {
+    const p = parseInt(document.getElementById('setPagesTarget').value, 10);
+    const m = parseInt(document.getElementById('setMcqTarget').value, 10);
+    const w = parseInt(document.getElementById('setWeekStart').value, 10);
+    if (p > 0) state.targets.pages = p;
+    if (m > 0) state.targets.mcq = m;
+    state.targets.weekStart = w;
+    saveState();
+    switchTab('today');
+    renderAll();
+  }
+
+  function exportCSV() {
+    let csv = 'Date,Type,Count,Subject,Time\n';
+    Object.keys(state.logs).sort().forEach(date => {
+      state.logs[date].forEach(e => {
+        csv += `${date},${e.type},${e.count},"${e.subject}",${e.time}\n`;
+      });
+    });
+    downloadFile('studypulse_logs.csv', csv, 'text/csv');
+  }
+
+  function exportJSON() {
+    downloadFile('studypulse_backup.json', JSON.stringify(state, null, 2), 'application/json');
+  }
+
+  function downloadFile(filename, content, mime) {
+    const blob = new Blob([content], { type: mime });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+  }
+
+  function clearAllData() {
+    if (confirm('Delete all study logs and reset targets?')) {
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+    }
+  }
+
+  function renderAll() {
+    renderToday();
+    renderWeek();
+  }
+
+  applyTheme();
+  renderAll();
+</script>
+</body>
+</html>
